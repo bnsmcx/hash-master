@@ -37,7 +37,7 @@ The hashcat-GUI project is intended to provide a Graphical User Interface that u
 	- [ ] kwprocessor for keyboard walk attacks (i.e. 1qaz!QAZ2wsx@WSX)
 
 # UML
-![743310666ea88129b60915bcf100ff55.png](../_resources/4adf6b4a4c4c4eeda02e33dc9867b3e8.png)
+![743310666ea88129b60915bcf100ff55.png](_resources/4adf6b4a4c4c4eeda02e33dc9867b3e8.png)
 	
 	
 # Class overviews
