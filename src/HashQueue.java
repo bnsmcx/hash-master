@@ -5,7 +5,12 @@ import java.util.Scanner;
 
 public class HashQueue {
 
-    private PriorityQueue<Hash> hashes = new PriorityQueue<>();
+    private PriorityQueue<Hash> hashes = new PriorityQueue<Hash>();
+
+    // Constructor allows input file to be passed at construction
+    public HashQueue(File inputFile) {
+        addHash(inputFile);
+    }
 
     // Creates and enqueues a single Hash object when passed a hash value as a String
     protected void addHash(String hash) {

@@ -4,73 +4,39 @@ import javax.swing.*;
 
 class MainGUI extends JFrame implements ActionListener {
 
-    // input panel components
-    private final JLabel inputLabel = new JLabel("Enter Tree: ");
-    private final JTextField inputText = new JTextField();
-
-    // button panel components
-    private final JButton makeTreeButton = new JButton("Make Tree");
-    private final JButton isBalancedButton = new JButton("Is Balanced?");
-    private final JButton isFullButton = new JButton("Is Full?");
-    private final JButton isProperButton = new JButton("Is Proper?");
-    private final JButton heightButton = new JButton("Height");
-    private final JButton nodesButton = new JButton("Nodes");
-    private final JButton  inorderButton = new JButton("Inorder");
-
-    // output panel components
-    private final JLabel outputLabel = new JLabel("Output: ");
-    private final JTextField outputText = new JTextField();
+    // test tab components
+    JPanel testPanel = new JPanel();
+    JButton testHashButton = new JButton("Test Hash");
+    JButton testHashQueueButton = new JButton("Test Hash Queue");
+    JTextArea testOutput = new JTextArea();
 
     // constructor
     public MainGUI() {
 
-        // frame setup
-        super("Binary Tree Calculator");
-        setSize(750, 160);
-        setResizable(false);
+        // main frame setup
+        super("Hashcat GUI");
+        setSize(750, 750);
+        setResizable(true);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new FlowLayout());
-        JPanel inputPanel = new JPanel();
-        JPanel buttonPanel = new JPanel();
-        JPanel outputPanel = new JPanel();
-        inputPanel.setLayout(new FlowLayout());
-        buttonPanel.setLayout(new FlowLayout());
-        outputPanel.setLayout(new FlowLayout());
 
-        // set text field sizes
-        Dimension textSize = new Dimension(300, 25);
-        inputText.setPreferredSize(textSize);
-        outputText.setPreferredSize(textSize);
+        // tabbed pane holds all swing containers within the parent JFrame
+        JTabbedPane tabbedPane = new JTabbedPane();
 
-        // populate panels
-        inputPanel.add(inputLabel);
-        inputPanel.add(inputText);
-        buttonPanel.add(makeTreeButton);
-        buttonPanel.add(isBalancedButton);
-        buttonPanel.add(isFullButton);
-        buttonPanel.add(isProperButton);
-        buttonPanel.add(heightButton);
-        buttonPanel.add(nodesButton);
-        buttonPanel.add(inorderButton);
-        outputPanel.add(outputLabel);
-        outputPanel.add(outputText);
+        // add components to testPanel and add testPanel to tabbedPane
+        testPanel.add(testHashButton);
+        testPanel.add(testHashQueueButton);
+        testPanel.add(testOutput);
+        testOutput.setPreferredSize(new Dimension(650, 500));
+        tabbedPane.setPreferredSize(new Dimension(750, 750));
+        tabbedPane.addTab("Test", testPanel);
 
-        // add sub-panels to frame
-        add(inputPanel);
-        add(buttonPanel);
-        add(outputPanel);
+        // add tabbedPane to frame
+        add(tabbedPane);
 
-        // listen for action on all the buttons
-        makeTreeButton.addActionListener(this);
-        isBalancedButton.addActionListener(this);
-        isFullButton.addActionListener(this);
-        isProperButton.addActionListener(this);
-        heightButton.addActionListener(this);
-        nodesButton.addActionListener(this);
-        inorderButton.addActionListener(this);
-
-        // prevent users from editing output text box
-        outputText.setEditable(false);
+        // set action listeners
+        testHashButton.addActionListener(this);
+        testHashQueueButton.addActionListener(this);
 
     } // end constructor
 
@@ -84,27 +50,14 @@ class MainGUI extends JFrame implements ActionListener {
         // take appropriate action based on which button was selected
         try {
             switch (buttonClicked) {
-                case "Make Tree":
+                case "Test Hash":
+                    testOutput.setText(Test.testHash());
 
                     break;
-                case "Is Balanced?":
-
+                case "Test Hash Queue":
+                    testOutput.setText(Test.testHashQueue());
                     break;
-                case "Is Full?":
 
-                    break;
-                case "Is Proper?":
-
-                    break;
-                case "Height":
-
-                    break;
-                case "Nodes":
-
-                    break;
-                case "Inorder":
-
-                    break;
             }
         } // end try
 

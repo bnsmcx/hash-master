@@ -1,6 +1,6 @@
 import java.util.ArrayList;
 
-public class Hash {
+public class Hash implements Comparable{
     String hash;
     String password;
     String verifiedHashType;
@@ -24,5 +24,10 @@ public class Hash {
 
     public String toString() {
         return hash + ":" + verifiedHashType + ":" + password;
+    }
+
+    @Override
+    public int compareTo(Object o) {
+        return 0;
     }
 }
