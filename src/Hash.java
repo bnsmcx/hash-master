@@ -8,6 +8,8 @@ public class Hash implements Comparable{
 
     protected Hash(String hash) {
         this.hash = hash;
+        this.possibleHashTypes = HashTypeIdentifier.identify(hash);
+
     }
 
     protected void setPassword(String password) {

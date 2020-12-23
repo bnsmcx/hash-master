@@ -11,7 +11,7 @@ public class Test {
         output.append(testHash.toString()).append("\n");
         output.append("\nUsing setter methods to populate instance variables...\n");
         testHash.setPassword("test");
-        testHash.setPossibleHashTypes(new ArrayList<String>(Arrays.asList("MD5", "MD4", "SHA1")));
+        //testHash.setPossibleHashTypes(HashTypeIdentifier.identify(testHash.hash));
         testHash.setVerifiedHashType("MD5");
         output.append("\nShow contents of possibleHashTypes list:\n\n\t");
         output.append(testHash.possibleHashTypes);
