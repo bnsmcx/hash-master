@@ -11,10 +11,11 @@ public class Test {
         output.append(testHash.toString()).append("\n");
         output.append("\nUsing setter methods to populate instance variables...\n");
         testHash.setPassword("test");
-        //testHash.setPossibleHashTypes(HashTypeIdentifier.identify(testHash.hash));
         testHash.setVerifiedHashType("MD5");
-        output.append("\nShow contents of possibleHashTypes list:\n\n\t");
-        output.append(testHash.possibleHashTypes);
+        output.append("\nShow contents of possibleHashTypes list:\n\n");
+        for (String guess : testHash.possibleHashTypes) {
+            output.append(guess).append("\n");
+        }
         output.append("\n\nFinal toString call:\n\n\t");
         output.append(testHash.toString());
         return String.valueOf(output);
@@ -34,5 +35,6 @@ public class Test {
 
         // call and return the toString for our test Hash Queue
         return testHashQueue.toString();
+
     }
 }

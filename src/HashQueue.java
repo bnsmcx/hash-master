@@ -35,6 +35,10 @@ public class HashQueue {
         for (Hash hash : this.hashes) {
             sb.append(hash.toString());
             sb.append("\n");
+            for (String guess : hash.possibleHashTypes) {
+                sb.append(guess);
+                sb.append("\n");
+            }
         }
         return String.valueOf(sb);
     }
