@@ -1,11 +1,13 @@
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.PriorityQueue;
+import java.util.Queue;
 import java.util.Scanner;
+import java.util.Stack;
 
 public class HashQueue {
 
-    private PriorityQueue<Hash> hashes = new PriorityQueue<Hash>();
+    private Stack<Hash> hashes = new Stack<>();
 
     // Constructor allows input file to be passed at construction
     public HashQueue(File inputFile) {
@@ -29,16 +31,16 @@ public class HashQueue {
         }
     }
 
+    protected void crackAll() {
+        for (Hash h : hashes) h.crack();
+    }
+
     // toString() iterates through queue and returns the info of all the hashes
     public String toString() {
         StringBuilder sb = new StringBuilder();
         for (Hash hash : this.hashes) {
             sb.append(hash.toString());
             sb.append("\n");
-            for (String guess : hash.possibleHashTypes) {
-                sb.append(guess);
-                sb.append("\n");
-            }
         }
         return String.valueOf(sb);
     }

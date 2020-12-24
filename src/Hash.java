@@ -1,6 +1,6 @@
 import java.util.ArrayList;
 
-public class Hash implements Comparable{
+public class Hash {
     String hash;
     String password;
     String verifiedHashType;
@@ -14,24 +14,12 @@ public class Hash implements Comparable{
 
     }
 
-    protected void setPassword(String password) {
-        this.password = password;
-    }
-
-    protected void setVerifiedHashType(String verifiedHashType) {
-        this.verifiedHashType = verifiedHashType;
-    }
-
-    protected void setPossibleHashTypes(ArrayList<String> possibleHashTypes) {
-        this.possibleHashTypes = possibleHashTypes;
+    public void crack() {
+        HashcatCommand.magic(this);
+        System.out.println(this.toString());
     }
 
     public String toString() {
-        return hash + ":" + verifiedHashType + ":" + password;
-    }
-
-    @Override
-    public int compareTo(Object o) {
-        return 0;
+        return "Hash:    " + hash + "\n    Hash Type:\t" + verifiedHashType + "\n    Password:\t" + password + "\n";
     }
 }

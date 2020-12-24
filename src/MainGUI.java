@@ -15,7 +15,7 @@ class MainGUI extends JFrame implements ActionListener {
 
         // main frame setup
         super("Hashcat GUI");
-        setSize(750, 750);
+        setSize(1200, 1200);
         setResizable(true);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new FlowLayout());
@@ -27,8 +27,8 @@ class MainGUI extends JFrame implements ActionListener {
         testPanel.add(testHashButton);
         testPanel.add(testHashQueueButton);
         testPanel.add(testOutput);
-        testOutput.setPreferredSize(new Dimension(650, 500));
-        tabbedPane.setPreferredSize(new Dimension(750, 750));
+        testOutput.setPreferredSize(new Dimension(1150, 1150));
+        tabbedPane.setPreferredSize(new Dimension(1200, 1200));
         tabbedPane.addTab("Test", testPanel);
 
         // add tabbedPane to frame

@@ -5,20 +5,9 @@ import java.util.Arrays;
 
 public class Test {
     public static String testHash() {
-        StringBuilder output = new StringBuilder();
-        Hash testHash = new Hash("098f6bcd4621d373cade4e832627b4f6");
-        output.append("Testing Hash class...\nInitial toString call:\n\n\t");
-        output.append(testHash.toString()).append("\n");
-        output.append("\nUsing setter methods to populate instance variables...\n");
-        testHash.setPassword("test");
-        testHash.setVerifiedHashType("MD5");
-        output.append("\nShow contents of possibleHashTypes list:\n\n");
-        for (String guess : testHash.possibleHashTypes) {
-            output.append(guess).append("\n");
-        }
-        output.append("\n\nFinal toString call:\n\n\t");
-        output.append(testHash.toString());
-        return String.valueOf(output);
+        Hash testHash = new Hash("e4ad93ca07acb8d908a3aa41e920ea4f4ef4f26e7f86cf8291c5db289780a5ae");
+        testHash.crack();
+        return testHash.toString();
     }
 
     public static String testHashQueue() {
@@ -32,6 +21,9 @@ public class Test {
 
         // create a new HashQueue with the file
         HashQueue testHashQueue = new HashQueue(inputFile);
+
+        // crack the hashes
+        testHashQueue.crackAll();
 
         // call and return the toString for our test Hash Queue
         return testHashQueue.toString();
