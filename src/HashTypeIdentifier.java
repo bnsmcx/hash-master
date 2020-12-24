@@ -1,6 +1,10 @@
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 public class HashTypeIdentifier {
     
@@ -19,9 +23,7 @@ public class HashTypeIdentifier {
         ArrayList<String> cleanGuesses = new ArrayList<>();
         for (int i = 1; i < rawHashidGuesses.length; i++) {
             String guess = rawHashidGuesses[i];
-            System.out.println(guess);
             String temp = guess.split("] ")[1];
-            System.out.println(temp);
             cleanGuesses.add(temp);
         }
         return cleanGuesses;
@@ -36,12 +38,30 @@ public class HashTypeIdentifier {
             Process proc = rt.exec(command);
             Scanner sc = new Scanner(proc.getInputStream());
             while (sc.hasNext()) {
-                System.out.println("Test");
                 rawHashidGuesses.add(sc.nextLine());
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
         return rawHashidGuesses.toArray(new String[0]);
+    }
+
+    public static ArrayList<String> getModes(ArrayList<String> possibleHashTypes) {
+        ArrayList<String> modesToAttempt = new ArrayList<>();
+
+        for (String type : possibleHashTypes) {
+            try {
+                Process proc = Runtime.getRuntime().exec(String.format("bash /home/daisy/hashcat-GUI/get_modes.sh %s", type));
+                Scanner sc = new Scanner(proc.getInputStream());
+                while (sc.hasNext()) {
+                    String temp = sc.nextLine();
+                    modesToAttempt.add(temp);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+        modesToAttempt = (ArrayList<String>) modesToAttempt.stream().distinct().collect(Collectors.toList());
+        return modesToAttempt;
     }
 }

@@ -5,10 +5,12 @@ public class Hash implements Comparable{
     String password;
     String verifiedHashType;
     ArrayList<String> possibleHashTypes;
+    ArrayList<String> modesToAttempt;
 
     protected Hash(String hash) {
         this.hash = hash;
         this.possibleHashTypes = HashTypeIdentifier.identify(hash);
+        this.modesToAttempt = HashTypeIdentifier.getModes(possibleHashTypes);
 
     }
 
