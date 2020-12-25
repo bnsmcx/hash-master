@@ -1,14 +1,16 @@
 import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.PriorityQueue;
-import java.util.Queue;
 import java.util.Scanner;
 import java.util.Stack;
 
 public class HashQueue {
 
-    private Stack<Hash> hashes = new Stack<>();
+    protected Stack<Hash> hashes = new Stack<>();
+
+    // default constructor
+    public HashQueue() {
+
+    }
 
     // Constructor allows input file to be passed at construction
     public HashQueue(File inputFile) throws IOException {
@@ -22,18 +24,16 @@ public class HashQueue {
 
     // iterates through an input file of hashes and calls addHash() for each provided hash
     protected void addHash(File hashes) throws IOException {
-        try {
-            Scanner scanner = new Scanner(hashes);
-            while (scanner.hasNext()) {
-                addHash(scanner.next());
-            }
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
+        Scanner scanner = new Scanner(hashes);
+        while (scanner.hasNext()) {
+            addHash(scanner.next());
         }
     }
 
     protected void crackAll() throws IOException {
-        for (Hash h : hashes) h.crack();
+        for (Hash h : hashes) {
+            h.crack();
+        }
     }
 
     // toString() iterates through queue and returns the info of all the hashes

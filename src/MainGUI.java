@@ -1,3 +1,4 @@
+import java.io.File;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
@@ -5,67 +6,96 @@ import javax.swing.*;
 
 class MainGUI extends JFrame implements ActionListener {
 
-    // test tab components
-    JPanel testPanel = new JPanel();
-    JButton testHashButton = new JButton("Test Hash");
-    JButton testHashQueueButton = new JButton("Test Hash Queue");
-    JTextArea testOutput = new JTextArea();
+    // hashQueue for all our hashes
+    HashQueue hashQueue = new HashQueue();
+
+    // File object for user input
+    static File inputFile = new File(System.getProperty("user.dir"));
+
+    // input panel components
+    private final JButton addHashButton = new JButton("Add Hash");
+    private final JButton inputFileButton = new JButton("Load Hashes From File");
+    private final JTextField inputHash = new JTextField();
+
+    // button panel components
+    private final JButton magicButton = new JButton("Magic");
+
+    // output panel components
+    String[] columnNames = {"Hash", "Type", "Password"};
+    String[][] data = new String[10][3];
+    JTable hashTable = new JTable(data, columnNames);
+    JScrollPane scrollPane = new JScrollPane(hashTable);
 
     // constructor
     public MainGUI() {
 
-        // main frame setup
+        // frame setup
         super("Hashcat GUI");
-        setSize(1200, 1200);
+        setSize(725, 350);
         setResizable(true);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new FlowLayout());
+        JPanel inputPanel = new JPanel();
+        JPanel buttonPanel = new JPanel();
+        JPanel outputPanel = new JPanel();
+        inputPanel.setLayout(new FlowLayout());
+        outputPanel.setLayout(new FlowLayout());
 
-        // tabbed pane holds all swing containers within the parent JFrame
-        JTabbedPane tabbedPane = new JTabbedPane();
+        // set text field sizes
+        inputHash.setPreferredSize(new Dimension(300, 25));
+        hashTable.setFillsViewportHeight(true);
 
-        // add components to testPanel and add testPanel to tabbedPane
-        testPanel.add(testHashButton);
-        testPanel.add(testHashQueueButton);
-        testPanel.add(testOutput);
-        testOutput.setPreferredSize(new Dimension(1150, 1150));
-        tabbedPane.setPreferredSize(new Dimension(1200, 1200));
-        tabbedPane.addTab("Test", testPanel);
 
-        // add tabbedPane to frame
-        add(tabbedPane);
+        // populate panels
+        inputPanel.add(addHashButton);
+        inputPanel.add(inputHash);
+        inputPanel.add(inputFileButton);
+        buttonPanel.add(magicButton);
+        outputPanel.add(scrollPane);
 
-        // set action listeners
-        testHashButton.addActionListener(this);
-        testHashQueueButton.addActionListener(this);
+        // add sub-panels to frame
+        add(inputPanel);
+        add(buttonPanel);
+        add(outputPanel);
+
+        // listen for action on input button
+        inputFileButton.addActionListener(this);
+        addHashButton.addActionListener(this);
+        magicButton.addActionListener(this);
+
+        // prevent users from editing output text box
 
     } // end constructor
 
-    // a single method to handle all button clicks
+    // action listener
     @Override
     public void actionPerformed(ActionEvent event) {
-
         // determine which button was clicked
         String buttonClicked = event.getActionCommand();
 
         // take appropriate action based on which button was selected
         try {
             switch (buttonClicked) {
-                case "Test Hash":
-                    testOutput.setText(Test.testHash());
-
+                case "Add Hash":
+                    String hash = inputHash.getText();
+                    if (hash == null) break;
+                    hashQueue.addHash(hash);
+                    updateTable();
                     break;
-                case "Test Hash Queue":
-                    testOutput.setText(Test.testHashQueue());
+                case "Load Hashes From File":
+                    JFileChooser jfc = new JFileChooser();
+                    jfc.setCurrentDirectory(inputFile);
+                    int returnValue = jfc.showOpenDialog(null);
+                    if (returnValue == JFileChooser.APPROVE_OPTION) inputFile = jfc.getSelectedFile();
+                    hashQueue.addHash(inputFile);
+                    updateTable();
                     break;
-
+                case "Magic":
+                    hashQueue.crackAll();
+                    updateTable();
+                    break;
             }
         } // end try
-
-        // alert the user if they try to perform an operation without a valid tree
-        catch (NullPointerException exception) {
-            JOptionPane.showMessageDialog(null, "You must make a tree first");
-        }
 
         // alert a user if no input detected
         catch (StringIndexOutOfBoundsException message) {
@@ -74,6 +104,20 @@ class MainGUI extends JFrame implements ActionListener {
             e.printStackTrace();
         }
     } // end actionPerformed
+
+    private void updateTable() {
+
+        data = new String[hashQueue.hashes.size()][3];
+        int i = 0;
+        for (Hash hash : hashQueue.hashes) {
+            data[i][0] = hash.hash;
+            data[i][1] = hash.verifiedHashType;
+            data[i][2] = hash.password;
+            i++;
+        }
+        JTable updatedTable = new JTable(data, columnNames);
+        hashTable.setModel(updatedTable.getModel());
+    }
 
     public static void main(String[] args) {
         MainGUI window = new MainGUI();

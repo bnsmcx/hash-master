@@ -2,6 +2,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 
 public class Hash {
+    Boolean currentlyAttemptingCrack = false;
     String hash;
     String password;
     String verifiedHashType;
@@ -16,9 +17,11 @@ public class Hash {
     }
 
     public void crack() throws IOException {
+        currentlyAttemptingCrack = true;
         HashcatCommand.magic(this);
         if (password == null) HashcatCommand.hailMary(this);
         System.out.println(this.toString());
+        currentlyAttemptingCrack = false;
     }
 
     public String toString() {
