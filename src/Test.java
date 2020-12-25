@@ -1,16 +1,22 @@
 import javax.swing.*;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 
 public class Test {
     public static String testHash() {
-        Hash testHash = new Hash("e4ad93ca07acb8d908a3aa41e920ea4f4ef4f26e7f86cf8291c5db289780a5ae");
-        testHash.crack();
+        Hash testHash = null;
+        try {
+            testHash = new Hash("84da0b929dc922d0958fdf870f546794");
+            testHash.crack();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         return testHash.toString();
     }
 
-    public static String testHashQueue() {
+    public static String testHashQueue() throws IOException {
 
         // get a test file from the user
         File inputFile =new File(System.getProperty("user.dir"));;
@@ -23,7 +29,11 @@ public class Test {
         HashQueue testHashQueue = new HashQueue(inputFile);
 
         // crack the hashes
-        testHashQueue.crackAll();
+        try {
+            testHashQueue.crackAll();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
 
         // call and return the toString for our test Hash Queue
         return testHashQueue.toString();

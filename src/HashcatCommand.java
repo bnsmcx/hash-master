@@ -22,4 +22,10 @@ public class HashcatCommand {
             }
         }
     }
+
+    public static void hailMary(Hash hash) throws IOException {
+        System.out.println("HAIL MARY!!!");
+        hash.modesToAttempt = HashTypeIdentifier.getAllModes();
+        magic(hash);
+    }
 }

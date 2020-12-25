@@ -1,5 +1,6 @@
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 import javax.swing.*;
 
 class MainGUI extends JFrame implements ActionListener {
@@ -69,6 +70,8 @@ class MainGUI extends JFrame implements ActionListener {
         // alert a user if no input detected
         catch (StringIndexOutOfBoundsException message) {
             JOptionPane.showMessageDialog(null, "No input detected");
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     } // end actionPerformed
 

@@ -1,3 +1,4 @@
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class Hash {
@@ -7,15 +8,16 @@ public class Hash {
     ArrayList<String> possibleHashTypes;
     ArrayList<String> modesToAttempt;
 
-    protected Hash(String hash) {
+    protected Hash(String hash) throws IOException {
         this.hash = hash;
         this.possibleHashTypes = HashTypeIdentifier.identify(hash);
         this.modesToAttempt = HashTypeIdentifier.getModes(possibleHashTypes);
 
     }
 
-    public void crack() {
+    public void crack() throws IOException {
         HashcatCommand.magic(this);
+        if (password == null) HashcatCommand.hailMary(this);
         System.out.println(this.toString());
     }
 
