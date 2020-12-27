@@ -1,8 +1,8 @@
-import java.io.File;
+import java.io.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.io.IOException;
 import javax.swing.*;
+import javax.swing.table.DefaultTableCellRenderer;
 
 class MainGUI extends JFrame implements ActionListener {
 
@@ -22,17 +22,17 @@ class MainGUI extends JFrame implements ActionListener {
 
     // output panel components
     String[] columnNames = {"Hash", "Type", "Password"};
-    String[][] data = new String[10][3];
+    String[][] data = new String[100][3];
     JTable hashTable = new JTable(data, columnNames);
-    JScrollPane scrollPane = new JScrollPane(hashTable);
+    JScrollPane scrollPane= new JScrollPane(hashTable);
 
     // constructor
     public MainGUI() {
 
         // frame setup
         super("Hashcat GUI");
-        setSize(725, 350);
-        setResizable(true);
+        setSize(1000, 500);
+        setResizable(false);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new FlowLayout());
         JPanel inputPanel = new JPanel();
@@ -40,11 +40,11 @@ class MainGUI extends JFrame implements ActionListener {
         JPanel outputPanel = new JPanel();
         inputPanel.setLayout(new FlowLayout());
         outputPanel.setLayout(new FlowLayout());
+        hashTable.setDefaultRenderer(hashTable.getColumnClass(2), new ColorRenderer());
 
-        // set text field sizes
+        // set dimensions
+        scrollPane.setPreferredSize(new Dimension(this.getWidth(), this.getHeight()-100));
         inputHash.setPreferredSize(new Dimension(300, 25));
-        hashTable.setFillsViewportHeight(true);
-
 
         // populate panels
         inputPanel.add(addHashButton);
@@ -52,6 +52,7 @@ class MainGUI extends JFrame implements ActionListener {
         inputPanel.add(inputFileButton);
         buttonPanel.add(magicButton);
         outputPanel.add(scrollPane);
+
 
         // add sub-panels to frame
         add(inputPanel);
@@ -106,16 +107,18 @@ class MainGUI extends JFrame implements ActionListener {
     } // end actionPerformed
 
     private void updateTable() {
-
         data = new String[hashQueue.hashes.size()][3];
         int i = 0;
         for (Hash hash : hashQueue.hashes) {
+
             data[i][0] = hash.hash;
             data[i][1] = hash.verifiedHashType;
             data[i][2] = hash.password;
+
             i++;
         }
         JTable updatedTable = new JTable(data, columnNames);
+        updatedTable.setDefaultRenderer(hashTable.getColumnClass(2), new ColorRenderer());
         hashTable.setModel(updatedTable.getModel());
     }
 
@@ -123,4 +126,23 @@ class MainGUI extends JFrame implements ActionListener {
         MainGUI window = new MainGUI();
         window.setVisible(true);
     } // end main method
+
+    class ColorRenderer extends DefaultTableCellRenderer {
+        @Override
+        public Component getTableCellRendererComponent(
+                JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
+            super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+
+            if (value != null) {
+                if (hashQueue.hashes.get(0).password == "maryland") setBackground(Color.GREEN);
+                if (hashQueue.hashes.get(0).password == "ohio") setBackground(Color.CYAN);
+
+
+            }
+
+            return super.getTableCellRendererComponent(table, value, isSelected,
+                    hasFocus, row, column);
+        }
+    }
 } // end Main class
+
