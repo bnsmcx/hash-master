@@ -10,10 +10,11 @@ class MainGUI extends JFrame implements ActionListener {
 
     // File objects for input hashes and wordlists
     static File inputFile = new File(System.getProperty("user.dir"));
-    //TODO add wordlist object
+    static File wordlist = new File("/usr/share/wordlists");
+    static String cewlOutputPath = "";
 
     // input panel components
-    private final JButton addHashButton = new JButton("Add Hash");
+    private final JButton addHashButton = new JButton("Add HashQueue.Hash");
     private final JButton inputFileButton = new JButton("Load Hashes From File");
     private final JTextField inputHash = new JTextField();
     private final JButton magicButton = new JButton("Magic");
@@ -21,7 +22,7 @@ class MainGUI extends JFrame implements ActionListener {
 
     // output panel components
     JPanel outputPanel = new JPanel();
-    String[] columnNames = {"Hash", "Type", "Password"};
+    String[] columnNames = {"HashQueue.Hash", "Type", "Password"};
     String[][] data = new String[100][3];
     JTable hashTable = new JTable(data, columnNames);
     JScrollPane scrollPane= new JScrollPane(hashTable);
@@ -30,6 +31,7 @@ class MainGUI extends JFrame implements ActionListener {
     JPanel wordlistPanel = new JPanel();
     JButton selectWordlistButton = new JButton("Set Wordlist");
     JTextField wordlistPathText = new JTextField();
+    JButton customWordlistButton = new JButton("Generate Wordlist with CeWL");
 
     // constructor
     public MainGUI() {
@@ -59,6 +61,7 @@ class MainGUI extends JFrame implements ActionListener {
         outputPanel.add(scrollPane);
         wordlistPanel.add(selectWordlistButton);
         wordlistPanel.add(wordlistPathText);
+        wordlistPanel.add(customWordlistButton);
 
         // populate tabbed top panel
         tabbedPane.add("Input", inputPanel);
@@ -74,6 +77,7 @@ class MainGUI extends JFrame implements ActionListener {
         addHashButton.addActionListener(this);
         magicButton.addActionListener(this);
         selectWordlistButton.addActionListener(this);
+        customWordlistButton.addActionListener(this);
 
 
     } // end constructor
@@ -87,7 +91,7 @@ class MainGUI extends JFrame implements ActionListener {
         // take appropriate action based on which button was selected
         try {
             switch (buttonClicked) {
-                case "Add Hash":
+                case "Add HashQueue.Hash":
                     String hash = inputHash.getText();
                     if (hash == null) break;
                     hashQueue.addHash(hash);
@@ -107,11 +111,60 @@ class MainGUI extends JFrame implements ActionListener {
                     break;
                 case "Set Wordlist":
                     JFileChooser wordlistChooser = new JFileChooser();
-                    wordlistChooser.setCurrentDirectory(inputFile);
+                    wordlistChooser.setCurrentDirectory(wordlist);
                     int rv = wordlistChooser.showOpenDialog(null);
-                    if (rv == JFileChooser.APPROVE_OPTION) inputFile = wordlistChooser.getSelectedFile();
-                    hashQueue.addHash(inputFile);
-                    wordlistPathText.setText("bb");
+                    if (rv == JFileChooser.APPROVE_OPTION) wordlist = wordlistChooser.getSelectedFile();
+                    wordlistPathText.setText(wordlist.getAbsolutePath());
+                    hashQueue.wordlist = wordlist.getAbsolutePath();
+                    break;
+                case "Generate Wordlist with CeWL":
+                    JFrame cewlDialog = new JFrame("CeWL");
+                    JButton run = new JButton("Run");
+                    Dimension textBoxDimension = new Dimension(150, 25);
+                    JLabel urlLabel = new JLabel("Target URL:");
+                    JTextField targetUrl = new JTextField();
+                    JLabel depthLabel = new JLabel("Depth to spider:");
+                    JTextField depth = new JTextField();
+                    JLabel outputLocation = new JLabel("CeWL output not set.");
+                    JButton save = new JButton("Set CeWL output");
+                    targetUrl.setPreferredSize(textBoxDimension);
+                    depth.setPreferredSize(textBoxDimension);
+                    cewlDialog.setSize(200, 250);
+                    cewlDialog.setLayout(new FlowLayout());
+                    cewlDialog.setResizable(true);
+                    cewlDialog.add(urlLabel);
+                    cewlDialog.add(targetUrl);
+                    cewlDialog.add(depthLabel);
+                    cewlDialog.add(depth);
+                    cewlDialog.add(outputLocation);
+                    cewlDialog.add(save);
+                    cewlDialog.add(run);
+                    cewlDialog.setLocationRelativeTo(null);
+                    cewlDialog.setVisible(true);
+
+                    save.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            JFileChooser fileChooser = new JFileChooser();
+                            int option = fileChooser.showSaveDialog(null);
+                            if(option == JFileChooser.APPROVE_OPTION) {
+                                File file = fileChooser.getSelectedFile();
+                                outputLocation.setText(file.getName());
+                                cewlOutputPath = file.getAbsolutePath();
+                            }
+                        }
+                    });
+
+                    run.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            cewl(depth.getText(), targetUrl.getText(), cewlOutputPath);
+                            hashQueue.wordlist = cewlOutputPath;
+                            wordlistPathText.setText(cewlOutputPath);
+                            cewlDialog.dispose();
+                        }
+                    });
+
                     break;
             }
         } // end try
@@ -124,10 +177,23 @@ class MainGUI extends JFrame implements ActionListener {
         }
     } // end actionPerformed
 
+    private void cewl(String depth, String url, String cewlOutputPath) {
+        url = url.replace("http://", "");
+        url = url.replace("https://", "");
+        String command = String.format("cewl -d  %s -w %s https://%s", depth, cewlOutputPath, url);
+        System.out.println(command);
+        try {
+            Process proc = Runtime.getRuntime().exec(command);
+            proc.waitFor();
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
+    }
+
     private void updateTable() {
         data = new String[hashQueue.hashes.size()][3];
         int i = 0;
-        for (Hash hash : hashQueue.hashes) {
+        for (HashQueue.Hash hash : hashQueue.hashes) {
 
             data[i][0] = hash.hash;
             data[i][1] = hash.verifiedHashType;
@@ -141,6 +207,7 @@ class MainGUI extends JFrame implements ActionListener {
 
     public static void main(String[] args) {
         MainGUI window = new MainGUI();
+        window.setLocationRelativeTo(null);
         window.setVisible(true);
     } // end main method
 } // end Main class

@@ -7,10 +7,10 @@ The hashcat-GUI project is intended to provide a Graphical User Interface that u
 
 # Functionality
 
-- [ ] Hash input
+- [ ] HashQueue.Hash input
 	- [ ] Read from file
 	- [ ] Copy and Paste 
-	- [ ] Hash extraction (i.e. user uploads encrypted zip and app extracts the hash)
+	- [ ] HashQueue.Hash extraction (i.e. user uploads encrypted zip and app extracts the hash)
 	- [ ] Inputs populate 'queue' table on GUI
 	- [ ] Auto-detects most likely hash type
 - [ ] Output
@@ -20,7 +20,7 @@ The hashcat-GUI project is intended to provide a Graphical User Interface that u
 	- [ ] Report
 	- [ ] Greppable
 - [ ] Magic mode
-	- [ ] For a given `Hash` object, iterate through possible hash types and attempt to crack
+	- [ ] For a given `HashQueue.Hash` object, iterate through possible hash types and attempt to crack
 - [ ] Command Builder
 	- [ ] Use checkboxes to toggle command line arguments
 	- [ ] Use dropdowns or file chooser to select word lists
@@ -48,7 +48,7 @@ The hashcat-GUI project is intended to provide a Graphical User Interface that u
 - Multiple tabs shift user between modes
 - Implemented as both a desktop app and webapp if possible
 
-## Hash
+## HashQueue.Hash
 
 Simple object to describe a single given hash.  Saves key steps in analysis of the hash as the application processes it.  
 
@@ -65,13 +65,13 @@ Simple object to describe a single given hash.  Saves key steps in analysis of t
 
 ## HashQueue
 
-This Class defines a priority queue that holds the `Hash` objects to be processed.  The constructor takes input hashes and creates and enques new `Hash` objects.  The priority is set according to time in the queue, basic FIFO implementation.  Future development may adjust this to prioritize faster hashing algorithms in instances where the queue contains `Hash` objects of different hash types.
+This Class defines a priority queue that holds the `HashQueue.Hash` objects to be processed.  The constructor takes input hashes and creates and enques new `HashQueue.Hash` objects.  The priority is set according to time in the queue, basic FIFO implementation.  Future development may adjust this to prioritize faster hashing algorithms in instances where the queue contains `HashQueue.Hash` objects of different hash types.
 
 The HashQueue contains a method that atatcks the hashes by reaching out as necessary to the utility classes.  Some of the use of utility classes, such as hash type identification, has already happend during construction.
 
 ## HashTypeIdentifier
 
-Utility class that accepts a given Hash object, passes the Hash.hash String to `hashid` and `hash-identifier` and parses the output to create a useful list of possible hash types ordered by probability.  This list is then set within the Hash object.
+Utility class that accepts a given HashQueue.Hash object, passes the HashQueue.Hash.hash String to `hashid` and `hash-identifier` and parses the output to create a useful list of possible hash types ordered by probability.  This list is then set within the HashQueue.Hash object.
 
 ## Modes (Enum)
 
@@ -79,7 +79,7 @@ Simple Enum that holds all the possible `hashcat` modes.  Has a method `getMode(
 
 ## HashcatCommand
 
-Instances of this class represent a command that will be passed to the system call to `hashcat`.  The class contains fields that correspond to every possible `hashcat` command line argument.  Most will be set via user interaction with the GUI while some will be set in response to values associated with the `Hash` object that is being attacked.
+Instances of this class represent a command that will be passed to the system call to `hashcat`.  The class contains fields that correspond to every possible `hashcat` command line argument.  Most will be set via user interaction with the GUI while some will be set in response to values associated with the `HashQueue.Hash` object that is being attacked.
 
 
 
