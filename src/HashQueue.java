@@ -83,7 +83,6 @@ public class HashQueue {
             this.hash = hash;
             this.possibleHashTypes = HashTypeIdentifier.identify(hash);
             this.modesToAttempt = HashTypeIdentifier.getModes(possibleHashTypes);
-
         }
 
         public void crack() throws IOException {

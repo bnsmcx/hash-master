@@ -12,26 +12,38 @@ class MainGUI extends JFrame implements ActionListener {
     static File inputFile = new File(System.getProperty("user.dir"));
     static File wordlist = new File("/usr/share/wordlists");
     static String cewlOutputPath = "";
+    static String rulePath = "";
 
-    // input panel components
-    private final JButton addHashButton = new JButton("Add HashQueue.Hash");
+    // inputPanel components
+    private final JButton addHashButton = new JButton("Add Hash");
     private final JButton inputFileButton = new JButton("Load Hashes From File");
     private final JTextField inputHash = new JTextField();
     private final JButton magicButton = new JButton("Magic");
+    private final JButton magicInfoButtion = new JButton("?");
     JPanel inputPanel = new JPanel();
 
-    // output panel components
+    // outputPanel components
     JPanel outputPanel = new JPanel();
-    String[] columnNames = {"HashQueue.Hash", "Type", "Password"};
+    String[] columnNames = {"Hash", "Type", "Password"};
     String[][] data = new String[100][3];
     JTable hashTable = new JTable(data, columnNames);
     JScrollPane scrollPane= new JScrollPane(hashTable);
 
-    // wordlist panel components
+    // wordlistPanel components
     JPanel wordlistPanel = new JPanel();
     JButton selectWordlistButton = new JButton("Set Wordlist");
-    JTextField wordlistPathText = new JTextField();
+    JTextField wordlistPathText = new JTextField("/home/daisy/parrot/rockyou.txt");
     JButton customWordlistButton = new JButton("Generate Wordlist with CeWL");
+
+    // maskPanel components
+    JPanel maskPanel = new JPanel();
+    JButton createRuleButton = new JButton("Create Rule");
+    Dimension textDimension = new Dimension(300, 25);
+    JButton setRuleButton = new JButton("Set Rule");
+    JTextField rulePathText = new JTextField();
+
+    // attackPanel components
+    JPanel attackPanel = new JPanel();
 
     // constructor
     public MainGUI() {
@@ -47,25 +59,32 @@ class MainGUI extends JFrame implements ActionListener {
         JTabbedPane tabbedPane = new JTabbedPane();
         inputPanel.setLayout(new FlowLayout());
         outputPanel.setLayout(new FlowLayout());
-        scrollPane.setPreferredSize(new Dimension(this.getWidth(), this.getHeight()/2));
-        inputHash.setPreferredSize(new Dimension(300, 25));
-        tabbedPane.setPreferredSize(new Dimension(this.getWidth(), this.getHeight()/2));
-        wordlistPathText.setPreferredSize(new Dimension(300, 25));
-
+        maskPanel.setLayout(new FlowLayout());
+        scrollPane.setPreferredSize(new Dimension(this.getWidth(), this.getHeight()/5 * 4));
+        inputHash.setPreferredSize(textDimension);
+        tabbedPane.setPreferredSize(new Dimension(this.getWidth(), this.getHeight()/5));
+        wordlistPathText.setPreferredSize(textDimension);
+        rulePathText.setPreferredSize(textDimension);
 
         // populate panels
         inputPanel.add(addHashButton);
         inputPanel.add(inputHash);
         inputPanel.add(inputFileButton);
         inputPanel.add(magicButton);
+        inputPanel.add(magicInfoButtion);
         outputPanel.add(scrollPane);
         wordlistPanel.add(selectWordlistButton);
         wordlistPanel.add(wordlistPathText);
         wordlistPanel.add(customWordlistButton);
+        maskPanel.add(setRuleButton);
+        maskPanel.add(rulePathText);
+        maskPanel.add(createRuleButton);
 
         // populate tabbed top panel
-        tabbedPane.add("Input", inputPanel);
-        tabbedPane.add("Wordlist", wordlistPanel);
+        tabbedPane.add("Input Hashes", inputPanel);
+        tabbedPane.add("Choose Wordlist", wordlistPanel);
+        tabbedPane.add("Configure Masks", maskPanel);
+        tabbedPane.add("Attack", attackPanel);
 
 
         // populate frame with top level containers
@@ -78,6 +97,9 @@ class MainGUI extends JFrame implements ActionListener {
         magicButton.addActionListener(this);
         selectWordlistButton.addActionListener(this);
         customWordlistButton.addActionListener(this);
+        magicInfoButtion.addActionListener(this);
+        createRuleButton.addActionListener(this);
+        setRuleButton.addActionListener(this);
 
 
     } // end constructor
@@ -116,6 +138,15 @@ class MainGUI extends JFrame implements ActionListener {
                     if (rv == JFileChooser.APPROVE_OPTION) wordlist = wordlistChooser.getSelectedFile();
                     wordlistPathText.setText(wordlist.getAbsolutePath());
                     hashQueue.wordlist = wordlist.getAbsolutePath();
+                    break;
+                case "Set Rule":
+                    File rule = new File(System.getProperty("user.dir"));
+                    JFileChooser ruleChooser = new JFileChooser();
+                    ruleChooser.setCurrentDirectory(rule);
+                    int ruleVariable = ruleChooser.showOpenDialog(null);
+                    if (ruleVariable == JFileChooser.APPROVE_OPTION) rule = ruleChooser.getSelectedFile();
+                    rulePath = rule.getAbsolutePath();
+                    rulePathText.setText(rulePath);
                     break;
                 case "Generate Wordlist with CeWL":
                     JFrame cewlDialog = new JFrame("CeWL");
@@ -164,7 +195,73 @@ class MainGUI extends JFrame implements ActionListener {
                             cewlDialog.dispose();
                         }
                     });
+                    break;
+                case "?":
+                    JOptionPane.showMessageDialog(null,
+                            "Clicking the 'Magic' button will perform a default dictionary attack\n " +
+                                    "against all the provided hashes.  It is great for catching low hanging\n "+
+                                    "fruit but beware that depending on the size of the list and the types\n "+
+                                    "of hashes this can take a long time.");
+                    break;
+                case "Create Rule":
+                    JFrame createRuleFrame = new JFrame("Create Rule");
+                    createRuleFrame.setSize(350,500);
+                    createRuleFrame.setResizable(true);
+                    JButton maskInfoButton = new JButton(" ? ");
+                    JButton create = new JButton("Create");
+                    JLabel prefixLabel = new JLabel("Prefix:");
+                    JLabel postfixLabel = new JLabel("Postfix:");
+                    JTextField prefixField = new JTextField("?d");
+                    JTextField postfixField = new JTextField("?d");
+                    prefixField.setPreferredSize(textDimension);
+                    postfixField.setPreferredSize(textDimension);
+                    JLabel capitalizationLabel = new JLabel("Manipulate Capitalization:");
+                    JComboBox<String> capitalizationCombo = new JComboBox<String>(new String[]{"-", "All Uppercase",
+                            "All Lowercase", "Capital first, lower rest", "Lower first, Capital rest", "Toggle Capitalization"});
+                    maskInfoButton.addActionListener(this);
+                    createRuleFrame.setLayout(new FlowLayout());
+                    createRuleFrame.add(prefixLabel);
+                    createRuleFrame.add(prefixField);
+                    createRuleFrame.add(postfixLabel);
+                    createRuleFrame.add(postfixField);
+                    createRuleFrame.add(capitalizationLabel);
+                    createRuleFrame.add(capitalizationCombo);
+                    createRuleFrame.add(create);
+                    createRuleFrame.add(maskInfoButton);
+                    createRuleFrame.setLocationRelativeTo(null);
+                    createRuleFrame.setVisible(true);
 
+                    create.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            JFileChooser fileChooser = new JFileChooser();
+                            int option = fileChooser.showSaveDialog(null);
+                            if(option == JFileChooser.APPROVE_OPTION) {
+                               rulePath = fileChooser.getSelectedFile().getAbsolutePath();
+                            }
+                            maskProcessor(prefixField.getText(), postfixField.getText(),
+                                    (String) capitalizationCombo.getSelectedItem(), rulePath);
+                        }
+                    });
+
+                    maskInfoButton.addActionListener(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            JOptionPane.showMessageDialog(null,
+                                    "Character sets are referenced with a '?'\n" +
+                                            "i.e. upper case alpha characters are '?u'\n" +
+                                            "\n" +
+                                            "\n" +
+                                            "Built-in charsets:\n" +
+                                            "\n" +
+                                            "  ?l = abcdefghijklmnopqrstuvwxyz\n" +
+                                            "  ?u = ABCDEFGHIJKLMNOPQRSTUVWXYZ\n" +
+                                            "  ?d = 0123456789\n" +
+                                            "  ?s =  !\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~\n" +
+                                            "  ?a = ?l?u?d?s\n" +
+                                            "  ?b = 0x00 - 0xff\n");
+                        }
+                    });
                     break;
             }
         } // end try
@@ -172,16 +269,42 @@ class MainGUI extends JFrame implements ActionListener {
         // alert a user if no input detected
         catch (StringIndexOutOfBoundsException message) {
             JOptionPane.showMessageDialog(null, "No input detected");
+        } catch (FileNotFoundException e) {
+            JOptionPane.showMessageDialog(null, "No input detected");
         } catch (IOException e) {
             e.printStackTrace();
         }
     } // end actionPerformed
 
+    private void maskProcessor(String prefix, String postfix, String capitalization, String rulePath) {
+        switch (capitalization) {
+            case "-":
+                capitalization = "";
+                break;
+            case "All Uppercase":
+                capitalization = "u";
+                break;
+            case "All Lowercase":
+                capitalization = "l";
+                break;
+            case "Capital first, lower rest":
+                capitalization = "c";
+                break;
+            case "Lower first, Capital rest":
+                capitalization = "C";
+                break;
+            case "Toggle Capitalization":
+                capitalization = "t";
+                break;
+        }
+        String command = String.format("maskprocessor '%s %s %s' -o %s", capitalization, prefix, postfix, rulePath);
+        System.out.println(command);
+    }
+
     private void cewl(String depth, String url, String cewlOutputPath) {
         url = url.replace("http://", "");
         url = url.replace("https://", "");
         String command = String.format("cewl -d  %s -w %s https://%s", depth, cewlOutputPath, url);
-        System.out.println(command);
         try {
             Process proc = Runtime.getRuntime().exec(command);
             proc.waitFor();
