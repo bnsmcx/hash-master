@@ -2,29 +2,34 @@ import java.io.*;
 import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
-import javax.swing.table.DefaultTableCellRenderer;
 
 class MainGUI extends JFrame implements ActionListener {
 
     // hashQueue for all our hashes
     HashQueue hashQueue = new HashQueue();
 
-    // File object for user input
+    // File objects for input hashes and wordlists
     static File inputFile = new File(System.getProperty("user.dir"));
+    //TODO add wordlist object
 
     // input panel components
     private final JButton addHashButton = new JButton("Add Hash");
     private final JButton inputFileButton = new JButton("Load Hashes From File");
     private final JTextField inputHash = new JTextField();
-
-    // button panel components
     private final JButton magicButton = new JButton("Magic");
+    JPanel inputPanel = new JPanel();
 
     // output panel components
+    JPanel outputPanel = new JPanel();
     String[] columnNames = {"Hash", "Type", "Password"};
     String[][] data = new String[100][3];
     JTable hashTable = new JTable(data, columnNames);
     JScrollPane scrollPane= new JScrollPane(hashTable);
+
+    // wordlist panel components
+    JPanel wordlistPanel = new JPanel();
+    JButton selectWordlistButton = new JButton("Set Wordlist");
+    JTextField wordlistPathText = new JTextField();
 
     // constructor
     public MainGUI() {
@@ -35,40 +40,45 @@ class MainGUI extends JFrame implements ActionListener {
         setResizable(false);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new FlowLayout());
-        JPanel inputPanel = new JPanel();
-        JPanel buttonPanel = new JPanel();
-        JPanel outputPanel = new JPanel();
+
+        // panel and tabbed pane config
+        JTabbedPane tabbedPane = new JTabbedPane();
         inputPanel.setLayout(new FlowLayout());
         outputPanel.setLayout(new FlowLayout());
-        hashTable.setDefaultRenderer(hashTable.getColumnClass(2), new ColorRenderer());
-
-        // set dimensions
-        scrollPane.setPreferredSize(new Dimension(this.getWidth(), this.getHeight()-100));
+        scrollPane.setPreferredSize(new Dimension(this.getWidth(), this.getHeight()/2));
         inputHash.setPreferredSize(new Dimension(300, 25));
+        tabbedPane.setPreferredSize(new Dimension(this.getWidth(), this.getHeight()/2));
+        wordlistPathText.setPreferredSize(new Dimension(300, 25));
+
 
         // populate panels
         inputPanel.add(addHashButton);
         inputPanel.add(inputHash);
         inputPanel.add(inputFileButton);
-        buttonPanel.add(magicButton);
+        inputPanel.add(magicButton);
         outputPanel.add(scrollPane);
+        wordlistPanel.add(selectWordlistButton);
+        wordlistPanel.add(wordlistPathText);
+
+        // populate tabbed top panel
+        tabbedPane.add("Input", inputPanel);
+        tabbedPane.add("Wordlist", wordlistPanel);
 
 
-        // add sub-panels to frame
-        add(inputPanel);
-        add(buttonPanel);
+        // populate frame with top level containers
+        add(tabbedPane);
         add(outputPanel);
 
-        // listen for action on input button
+        // listen for action on buttons
         inputFileButton.addActionListener(this);
         addHashButton.addActionListener(this);
         magicButton.addActionListener(this);
+        selectWordlistButton.addActionListener(this);
 
-        // prevent users from editing output text box
 
     } // end constructor
-
     // action listener
+
     @Override
     public void actionPerformed(ActionEvent event) {
         // determine which button was clicked
@@ -95,6 +105,14 @@ class MainGUI extends JFrame implements ActionListener {
                     hashQueue.crackAll();
                     updateTable();
                     break;
+                case "Set Wordlist":
+                    JFileChooser wordlistChooser = new JFileChooser();
+                    wordlistChooser.setCurrentDirectory(inputFile);
+                    int rv = wordlistChooser.showOpenDialog(null);
+                    if (rv == JFileChooser.APPROVE_OPTION) inputFile = wordlistChooser.getSelectedFile();
+                    hashQueue.addHash(inputFile);
+                    wordlistPathText.setText("bb");
+                    break;
             }
         } // end try
 
@@ -118,7 +136,6 @@ class MainGUI extends JFrame implements ActionListener {
             i++;
         }
         JTable updatedTable = new JTable(data, columnNames);
-        updatedTable.setDefaultRenderer(hashTable.getColumnClass(2), new ColorRenderer());
         hashTable.setModel(updatedTable.getModel());
     }
 
@@ -126,23 +143,5 @@ class MainGUI extends JFrame implements ActionListener {
         MainGUI window = new MainGUI();
         window.setVisible(true);
     } // end main method
-
-    class ColorRenderer extends DefaultTableCellRenderer {
-        @Override
-        public Component getTableCellRendererComponent(
-                JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
-            super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-
-            if (value != null) {
-                if (hashQueue.hashes.get(0).password == "maryland") setBackground(Color.GREEN);
-                if (hashQueue.hashes.get(0).password == "ohio") setBackground(Color.CYAN);
-
-
-            }
-
-            return super.getTableCellRendererComponent(table, value, isSelected,
-                    hasFocus, row, column);
-        }
-    }
 } // end Main class
 
