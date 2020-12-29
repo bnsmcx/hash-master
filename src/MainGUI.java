@@ -113,7 +113,7 @@ class MainGUI extends JFrame implements ActionListener {
         // take appropriate action based on which button was selected
         try {
             switch (buttonClicked) {
-                case "Add HashQueue.Hash":
+                case "Add Hash":
                     String hash = inputHash.getText();
                     if (hash == null) break;
                     hashQueue.addHash(hash);

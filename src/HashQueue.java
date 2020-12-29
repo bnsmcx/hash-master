@@ -1,5 +1,7 @@
 import java.io.*;
 import java.util.*;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class HashQueue {
 
@@ -18,9 +20,11 @@ public class HashQueue {
 
     public void magic(Hash hashObject) {
         for (String mode : hashObject.modesToAttempt) {
+            if (hashObject.modesAttempted.contains(mode)) continue;
             String command = String.format("hashcat --force -m %s %s " + wordlist + "", mode, hashObject.hash);
             System.out.println(command);
             try {
+                hashObject.modesAttempted.add(mode);
                 Process proc = Runtime.getRuntime().exec(command);
                 proc.waitFor();
                 proc = Runtime.getRuntime().exec(String.format("bash /home/daisy/hashcat-GUI/check_potfile.sh %s", hashObject.hash));
@@ -43,16 +47,15 @@ public class HashQueue {
     }
 
     // Creates and enqueues a single HashQueue.Hash object when passed a hash value as a String
-    protected void addHash(String hash) throws IOException {
+    protected Runnable addHash(String hash) throws IOException {
         this.hashes.add(new Hash(hash));
+        return null;
     }
 
     // iterates through an input file of hashes and calls addHash() for each provided hash
     protected void addHash(File hashes) throws IOException {
-        Scanner scanner = new Scanner(hashes);
-        while (scanner.hasNext()) {
-            addHash(scanner.next());
-        }
+        Scanner sc = new Scanner(hashes);
+        while (sc.hasNext()) addHash(sc.next());
     }
 
     protected void crackAll() throws IOException {
@@ -78,6 +81,7 @@ public class HashQueue {
         String verifiedHashType;
         ArrayList<String> possibleHashTypes;
         ArrayList<String> modesToAttempt;
+        ArrayList<String> modesAttempted = new ArrayList<>();
 
         protected Hash(String hash) throws IOException {
             this.hash = hash;
@@ -88,13 +92,13 @@ public class HashQueue {
         public void crack() throws IOException {
             beingProcessed = true;
             magic(this);
-            //if (password == null) HashcatCommand.hailMary(this);
+            if (password == null) hailMary(this);
             System.out.println(this.toString());
             beingProcessed = false;
         }
 
         public String toString() {
-            return "HashQueue.Hash:    " + hash + "\n    HashQueue.Hash Type:\t" + verifiedHashType + "\n    Password:\t" + password + "\n";
+            return "Hash:    " + hash + "\n    Hash Type:\t" + verifiedHashType + "\n    Password:\t" + password + "\n";
         }
     }
 }
