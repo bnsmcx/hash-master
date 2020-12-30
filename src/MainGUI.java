@@ -44,6 +44,10 @@ class MainGUI extends JFrame implements ActionListener {
 
     // attackPanel components
     JPanel attackPanel = new JPanel();
+    JLabel commandLabel = new JLabel("Command to execute:");
+    JTextField commandText = new JTextField();
+    JButton configureCommandButton = new JButton("Configure");
+    JButton attackButton = new JButton("Attack");
 
     // constructor
     public MainGUI() {
@@ -60,11 +64,13 @@ class MainGUI extends JFrame implements ActionListener {
         inputPanel.setLayout(new FlowLayout());
         outputPanel.setLayout(new FlowLayout());
         maskPanel.setLayout(new FlowLayout());
-        scrollPane.setPreferredSize(new Dimension(this.getWidth(), this.getHeight()/5 * 4));
+        scrollPane.setPreferredSize(new Dimension(this.getWidth(), this.getHeight()/7 * 5));
         inputHash.setPreferredSize(textDimension);
-        tabbedPane.setPreferredSize(new Dimension(this.getWidth(), this.getHeight()/5));
+        tabbedPane.setPreferredSize(new Dimension(this.getWidth(), this.getHeight()/6));
         wordlistPathText.setPreferredSize(textDimension);
         rulePathText.setPreferredSize(textDimension);
+        commandText.setPreferredSize(textDimension);
+        commandText.setEditable(false);
 
         // populate panels
         inputPanel.add(addHashButton);
@@ -79,6 +85,10 @@ class MainGUI extends JFrame implements ActionListener {
         maskPanel.add(setRuleButton);
         maskPanel.add(rulePathText);
         maskPanel.add(createRuleButton);
+        attackPanel.add(commandLabel);
+        attackPanel.add(commandText);
+        attackPanel.add(configureCommandButton);
+        attackPanel.add(attackButton);
 
         // populate tabbed top panel
         tabbedPane.add("Input Hashes", inputPanel);
@@ -100,6 +110,8 @@ class MainGUI extends JFrame implements ActionListener {
         magicInfoButtion.addActionListener(this);
         createRuleButton.addActionListener(this);
         setRuleButton.addActionListener(this);
+        attackButton.addActionListener(this);
+        configureCommandButton.addActionListener(this);
 
 
     } // end constructor
@@ -203,9 +215,15 @@ class MainGUI extends JFrame implements ActionListener {
                                     "fruit but beware that depending on the size of the list and the types\n "+
                                     "of hashes this can take a long time.");
                     break;
+                case "Attack":
+                    System.out.println("Attack");
+                    break;
+                case "Configure":
+                    System.out.println("Configure");
+                    break;
                 case "Create Rule":
                     JFrame createRuleFrame = new JFrame("Create Rule");
-                    createRuleFrame.setSize(350,500);
+                    createRuleFrame.setSize(375,200);
                     createRuleFrame.setResizable(true);
                     JButton maskInfoButton = new JButton(" ? ");
                     JButton create = new JButton("Create");
@@ -297,8 +315,16 @@ class MainGUI extends JFrame implements ActionListener {
                 capitalization = "t";
                 break;
         }
-        String command = String.format("maskprocessor '%s %s %s' -o %s", capitalization, prefix, postfix, rulePath);
-        System.out.println(command);
+        if (prefix != null) prefix = "^" + prefix;
+        if (postfix != null) postfix = "$" + postfix;
+        String[] command = {"maskprocessor", String.valueOf(capitalization + " " + prefix + " " + postfix), "-o", rulePath};
+        rulePathText.setText(rulePath);
+        try {
+            Process proc = Runtime.getRuntime().exec(command);
+            proc.waitFor();
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 
     private void cewl(String depth, String url, String cewlOutputPath) {
