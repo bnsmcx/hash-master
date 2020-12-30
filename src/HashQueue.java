@@ -4,7 +4,8 @@ import java.util.*;
 public class HashQueue {
 
     protected Stack<Hash> hashes = new Stack<>();
-    protected String wordlist = "/home/daisy/parrot/rockyou.txt";
+    protected String wordlist = "";
+    private String rule = "";
 
     // default constructor
     public HashQueue() {
@@ -16,33 +17,11 @@ public class HashQueue {
         addHash(inputFile);
     }
 
-    public void magic(Hash hashObject) {
-        for (String mode : hashObject.modesToAttempt) {
-            if (hashObject.modesAttempted.contains(mode)) continue;
-            String command = String.format("hashcat --force -m %s %s " + wordlist + "", mode, hashObject.hash);
-            System.out.println(command);
-            try {
-                hashObject.modesAttempted.add(mode);
-                Process proc = Runtime.getRuntime().exec(command);
-                proc.waitFor();
-                proc = Runtime.getRuntime().exec(String.format("bash /home/daisy/hashcat-GUI/check_potfile.sh %s", hashObject.hash));
-                Scanner sc = new Scanner(proc.getInputStream());
-                if (sc.hasNext()) {
-                    hashObject.password = sc.next();
-                    hashObject.verifiedHashType = HashTypeIdentifier.getTypeFromMode(mode);
-                    return;
-                }
-            } catch (IOException | InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }
-
-    public void hailMary(Hash hash) throws IOException {
-        System.out.println("HAIL MARY!!!");
-        hash.modesToAttempt = HashTypeIdentifier.getAllModes();
-        magic(hash);
-    }
+//    public void hailMary(Hash hash) throws IOException {
+//        System.out.println("HAIL MARY!!!");
+//        hash.modesToAttempt = HashTypeIdentifier.getAllModes();
+//        attack(hash);
+//    }
 
     // Creates and enqueues a single HashQueue.Hash object when passed a hash value as a String
     protected Runnable addHash(String hash) throws IOException {
@@ -56,12 +35,6 @@ public class HashQueue {
         while (sc.hasNext()) addHash(sc.next());
     }
 
-    protected void crackAll() throws IOException {
-        for (Hash h : hashes) {
-            h.crack();
-        }
-    }
-
     // toString() iterates through queue and returns the info of all the hashes
     public String toString() {
         StringBuilder sb = new StringBuilder();
@@ -70,6 +43,39 @@ public class HashQueue {
             sb.append("\n");
         }
         return String.valueOf(sb);
+    }
+
+    public void attack(String wordlist, String rule) throws FileNotFoundException {
+        this.wordlist = wordlist;
+        this.rule = rule;
+
+        // confirm wordlist exists, forces exception
+        Scanner testWordlist = new Scanner(new File(wordlist));
+        if (!testWordlist.hasNext()) throw new FileNotFoundException();
+
+        for (Hash hash : this.hashes) {
+            System.out.println("!");
+            for (String mode : hash.modesToAttempt) {
+                if (hash.modesAttempted.contains(mode)) continue;
+                if (rule.length() > 0) rule = " -r " + rule;
+                String command = String.format("hashcat --force -m %s%s %s " + wordlist + "", mode, rule, hash.hash);
+                System.out.println(command);
+                try {
+                    hash.modesAttempted.add(mode);
+                    Process proc = Runtime.getRuntime().exec(command);
+                    proc.waitFor();
+                    proc = Runtime.getRuntime().exec(String.format("bash /home/daisy/hashcat-GUI/check_potfile.sh %s", hash.hash));
+                    Scanner sc = new Scanner(proc.getInputStream());
+                    if (sc.hasNext()) {
+                        hash.password = sc.next();
+                        hash.verifiedHashType = HashTypeIdentifier.getTypeFromMode(mode);
+                        return;
+                    }
+                } catch (IOException | InterruptedException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 
     public class Hash {
@@ -85,14 +91,6 @@ public class HashQueue {
             this.hash = hash;
             this.possibleHashTypes = HashTypeIdentifier.identify(hash);
             this.modesToAttempt = HashTypeIdentifier.getModes(possibleHashTypes);
-        }
-
-        public void crack() throws IOException {
-            beingProcessed = true;
-            magic(this);
-            if (password == null) hailMary(this);
-            System.out.println(this.toString());
-            beingProcessed = false;
         }
 
         public String toString() {

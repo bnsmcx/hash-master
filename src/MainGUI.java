@@ -10,7 +10,7 @@ class MainGUI extends JFrame implements ActionListener {
 
     // File objects for input hashes and wordlists
     static File inputFile = new File(System.getProperty("user.dir"));
-    static File wordlist = new File("/usr/share/wordlists");
+    static File wordlist = new File("/home/daisy/parrot/rockyou.txt");
     static String cewlOutputPath = "";
     static String rulePath = "";
 
@@ -32,21 +32,22 @@ class MainGUI extends JFrame implements ActionListener {
     // wordlistPanel components
     JPanel wordlistPanel = new JPanel();
     JButton selectWordlistButton = new JButton("Set Wordlist");
-    JTextField wordlistPathText = new JTextField("/home/daisy/parrot/rockyou.txt");
+    JTextField wordlistPathText = new JTextField(wordlist.getAbsolutePath());
     JButton customWordlistButton = new JButton("Generate Wordlist with CeWL");
 
     // maskPanel components
     JPanel maskPanel = new JPanel();
     JButton createRuleButton = new JButton("Create Rule");
-    Dimension textDimension = new Dimension(300, 25);
+    Dimension textDimensionLong = new Dimension(300, 25);
+    Dimension textDimensionShort = new Dimension(150, 25);
     JButton setRuleButton = new JButton("Set Rule");
     JTextField rulePathText = new JTextField();
+    JButton clearRuleButton = new JButton("Clear Rule");
 
     // attackPanel components
     JPanel attackPanel = new JPanel();
     JLabel commandLabel = new JLabel("Command to execute:");
     JTextField commandText = new JTextField();
-    JButton configureCommandButton = new JButton("Configure");
     JButton attackButton = new JButton("Attack");
 
     // constructor
@@ -65,12 +66,13 @@ class MainGUI extends JFrame implements ActionListener {
         outputPanel.setLayout(new FlowLayout());
         maskPanel.setLayout(new FlowLayout());
         scrollPane.setPreferredSize(new Dimension(this.getWidth(), this.getHeight()/7 * 5));
-        inputHash.setPreferredSize(textDimension);
+        inputHash.setPreferredSize(textDimensionLong);
         tabbedPane.setPreferredSize(new Dimension(this.getWidth(), this.getHeight()/6));
-        wordlistPathText.setPreferredSize(textDimension);
-        rulePathText.setPreferredSize(textDimension);
-        commandText.setPreferredSize(textDimension);
+        wordlistPathText.setPreferredSize(textDimensionLong);
+        rulePathText.setPreferredSize(textDimensionLong);
+        commandText.setPreferredSize(new Dimension(650, 25));
         commandText.setEditable(false);
+        updateAttack();
 
         // populate panels
         inputPanel.add(addHashButton);
@@ -82,12 +84,12 @@ class MainGUI extends JFrame implements ActionListener {
         wordlistPanel.add(selectWordlistButton);
         wordlistPanel.add(wordlistPathText);
         wordlistPanel.add(customWordlistButton);
+        maskPanel.add(clearRuleButton);
         maskPanel.add(setRuleButton);
         maskPanel.add(rulePathText);
         maskPanel.add(createRuleButton);
         attackPanel.add(commandLabel);
         attackPanel.add(commandText);
-        attackPanel.add(configureCommandButton);
         attackPanel.add(attackButton);
 
         // populate tabbed top panel
@@ -95,7 +97,6 @@ class MainGUI extends JFrame implements ActionListener {
         tabbedPane.add("Choose Wordlist", wordlistPanel);
         tabbedPane.add("Configure Masks", maskPanel);
         tabbedPane.add("Attack", attackPanel);
-
 
         // populate frame with top level containers
         add(tabbedPane);
@@ -111,7 +112,7 @@ class MainGUI extends JFrame implements ActionListener {
         createRuleButton.addActionListener(this);
         setRuleButton.addActionListener(this);
         attackButton.addActionListener(this);
-        configureCommandButton.addActionListener(this);
+        clearRuleButton.addActionListener(this);
 
 
     } // end constructor
@@ -127,9 +128,11 @@ class MainGUI extends JFrame implements ActionListener {
             switch (buttonClicked) {
                 case "Add Hash":
                     String hash = inputHash.getText();
-                    if (hash == null) break;
-                    hashQueue.addHash(hash);
-                    updateTable();
+                    if (hash.length() > 0) {
+                        hashQueue.addHash(hash);
+                        updateTable();
+                    };
+
                     break;
                 case "Load Hashes From File":
                     JFileChooser jfc = new JFileChooser();
@@ -140,7 +143,7 @@ class MainGUI extends JFrame implements ActionListener {
                     updateTable();
                     break;
                 case "Magic":
-                    hashQueue.crackAll();
+                    attack();
                     updateTable();
                     break;
                 case "Set Wordlist":
@@ -159,19 +162,19 @@ class MainGUI extends JFrame implements ActionListener {
                     if (ruleVariable == JFileChooser.APPROVE_OPTION) rule = ruleChooser.getSelectedFile();
                     rulePath = rule.getAbsolutePath();
                     rulePathText.setText(rulePath);
+                    updateAttack();
                     break;
                 case "Generate Wordlist with CeWL":
                     JFrame cewlDialog = new JFrame("CeWL");
                     JButton run = new JButton("Run");
-                    Dimension textBoxDimension = new Dimension(150, 25);
                     JLabel urlLabel = new JLabel("Target URL:");
                     JTextField targetUrl = new JTextField();
                     JLabel depthLabel = new JLabel("Depth to spider:");
                     JTextField depth = new JTextField();
                     JLabel outputLocation = new JLabel("CeWL output not set.");
                     JButton save = new JButton("Set CeWL output");
-                    targetUrl.setPreferredSize(textBoxDimension);
-                    depth.setPreferredSize(textBoxDimension);
+                    targetUrl.setPreferredSize(textDimensionShort);
+                    depth.setPreferredSize(textDimensionShort);
                     cewlDialog.setSize(200, 250);
                     cewlDialog.setLayout(new FlowLayout());
                     cewlDialog.setResizable(true);
@@ -202,8 +205,6 @@ class MainGUI extends JFrame implements ActionListener {
                         @Override
                         public void actionPerformed(ActionEvent e) {
                             cewl(depth.getText(), targetUrl.getText(), cewlOutputPath);
-                            hashQueue.wordlist = cewlOutputPath;
-                            wordlistPathText.setText(cewlOutputPath);
                             cewlDialog.dispose();
                         }
                     });
@@ -216,10 +217,12 @@ class MainGUI extends JFrame implements ActionListener {
                                     "of hashes this can take a long time.");
                     break;
                 case "Attack":
-                    System.out.println("Attack");
+                    attack();
                     break;
-                case "Configure":
-                    System.out.println("Configure");
+                case "Clear Rule":
+                    rulePath = "";
+                    rulePathText.setText(rulePath);
+                    updateAttack();
                     break;
                 case "Create Rule":
                     JFrame createRuleFrame = new JFrame("Create Rule");
@@ -231,8 +234,8 @@ class MainGUI extends JFrame implements ActionListener {
                     JLabel postfixLabel = new JLabel("Postfix:");
                     JTextField prefixField = new JTextField("?d");
                     JTextField postfixField = new JTextField("?d");
-                    prefixField.setPreferredSize(textDimension);
-                    postfixField.setPreferredSize(textDimension);
+                    prefixField.setPreferredSize(textDimensionLong);
+                    postfixField.setPreferredSize(textDimensionLong);
                     JLabel capitalizationLabel = new JLabel("Manipulate Capitalization:");
                     JComboBox<String> capitalizationCombo = new JComboBox<String>(new String[]{"-", "All Uppercase",
                             "All Lowercase", "Capital first, lower rest", "Lower first, Capital rest", "Toggle Capitalization"});
@@ -280,6 +283,7 @@ class MainGUI extends JFrame implements ActionListener {
                                             "  ?b = 0x00 - 0xff\n");
                         }
                     });
+                    updateAttack();
                     break;
             }
         } // end try
@@ -293,6 +297,26 @@ class MainGUI extends JFrame implements ActionListener {
             e.printStackTrace();
         }
     } // end actionPerformed
+
+    private void updateAttack() {
+        String rule = "";
+        if (rulePath.length() > 0) rule = " -r " + rulePath;
+        String command = String.format("hashcat --force -m <mode>%s <hash> " + wordlist, rule);
+        commandText.setText(command);
+    }
+
+    private void attack() {
+        if (hashQueue.hashes.size() < 1) {
+            JOptionPane.showMessageDialog(null, "No hashes to crack.");
+            return;
+        }
+        try {
+            hashQueue.attack(wordlist.getAbsolutePath(), rulePath);
+        } catch (FileNotFoundException e) {
+            JOptionPane.showMessageDialog(null, "Please set a valid wordlist.");
+        }
+        updateTable();
+    }
 
     private void maskProcessor(String prefix, String postfix, String capitalization, String rulePath) {
         switch (capitalization) {
@@ -337,9 +361,12 @@ class MainGUI extends JFrame implements ActionListener {
         } catch (IOException | InterruptedException e) {
             e.printStackTrace();
         }
+        wordlist = new File(cewlOutputPath);
+        wordlistPathText.setText(wordlist.getAbsolutePath());
     }
 
     private void updateTable() {
+
         data = new String[hashQueue.hashes.size()][3];
         int i = 0;
         for (HashQueue.Hash hash : hashQueue.hashes) {
