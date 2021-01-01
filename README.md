@@ -42,9 +42,10 @@ The hashcat-GUI project is intended to provide a Graphical User Interface that u
 # Class overviews
 <p>&nbsp;</p>
 ***Extensive Refactoring has consolidated functionality down to three class files:***
--MainGui
--HashQueue
--HashIdentifier
+
+ -MainGui
+ -HashQueue
+ -HashIdentifier
 
 ## MainGui
 - Constructed using Swing
