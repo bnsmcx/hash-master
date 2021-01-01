@@ -348,13 +348,22 @@ class MainGUI extends JFrame implements ActionListener {
                 break;
         }
         if (prefix != null) {
-            String[] pre = prefix.split(" ");
-            System.out.println(pre.length);
-            for (String s : pre) System.out.println(s);
-            prefix = "^" + prefix;
+            String[] pre = prefix.split("\\?");
+            prefix = "";
+            for (String s : pre) {
+                if (s.length() < 1) continue;
+                prefix += "^?" + s.strip() + " ";
+            }
         }
-        if (postfix != null) postfix = "$" + postfix;
-        String[] command = {"maskprocessor", String.valueOf(capitalization + " " + prefix + " " + postfix), "-o", rulePath};
+        if (postfix != null) {
+            String[] post = postfix.split("\\?");
+            postfix = "";
+            for (String s : post) {
+                if (s.length() < 1) continue;
+                postfix += "$?" + s.strip() + " ";
+            }
+        }
+        String[] command = {"maskprocessor", String.valueOf(capitalization + " " + prefix + postfix), "-o", rulePath};
         rulePathText.setText(rulePath);
         try {
             Process proc = Runtime.getRuntime().exec(command);
