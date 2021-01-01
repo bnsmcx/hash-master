@@ -1,6 +1,9 @@
 import java.io.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.util.Scanner;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import javax.swing.*;
 
 class MainGUI extends JFrame implements ActionListener {
@@ -102,7 +105,7 @@ class MainGUI extends JFrame implements ActionListener {
         add(tabbedPane);
         add(outputPanel);
 
-        // listen for action on buttons
+        // listen for action
         inputFileButton.addActionListener(this);
         addHashButton.addActionListener(this);
         magicButton.addActionListener(this);
@@ -217,6 +220,7 @@ class MainGUI extends JFrame implements ActionListener {
                                     "of hashes this can take a long time.");
                     break;
                 case "Attack":
+                    System.out.println(rulePath);
                     attack();
                     break;
                 case "Clear Rule":
@@ -262,6 +266,8 @@ class MainGUI extends JFrame implements ActionListener {
                             }
                             maskProcessor(prefixField.getText(), postfixField.getText(),
                                     (String) capitalizationCombo.getSelectedItem(), rulePath);
+                            updateAttack();
+                            createRuleFrame.dispose();
                         }
                     });
 
@@ -283,8 +289,10 @@ class MainGUI extends JFrame implements ActionListener {
                                             "  ?b = 0x00 - 0xff\n");
                         }
                     });
-                    updateAttack();
                     break;
+                default:
+                    updateAttack();
+                    updateTable();
             }
         } // end try
 
@@ -339,7 +347,12 @@ class MainGUI extends JFrame implements ActionListener {
                 capitalization = "t";
                 break;
         }
-        if (prefix != null) prefix = "^" + prefix;
+        if (prefix != null) {
+            String[] pre = prefix.split(" ");
+            System.out.println(pre.length);
+            for (String s : pre) System.out.println(s);
+            prefix = "^" + prefix;
+        }
         if (postfix != null) postfix = "$" + postfix;
         String[] command = {"maskprocessor", String.valueOf(capitalization + " " + prefix + " " + postfix), "-o", rulePath};
         rulePathText.setText(rulePath);
@@ -379,10 +392,26 @@ class MainGUI extends JFrame implements ActionListener {
         }
         JTable updatedTable = new JTable(data, columnNames);
         hashTable.setModel(updatedTable.getModel());
+        System.out.println(Math.random());
     }
 
     public static void main(String[] args) {
         MainGUI window = new MainGUI();
+        ExecutorService service = Executors.newFixedThreadPool(4);
+        service.submit(new Runnable() {
+            public void run() {
+
+                while (true) {
+                    try {
+                        Thread.sleep(1500);
+                        window.updateTable();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        });
+
         window.setLocationRelativeTo(null);
         window.setVisible(true);
     } // end main method

@@ -52,12 +52,11 @@ public class HashQueue {
         // confirm wordlist exists, forces exception
         Scanner testWordlist = new Scanner(new File(wordlist));
         if (!testWordlist.hasNext()) throw new FileNotFoundException();
-
-        for (Hash hash : this.hashes) {
-            System.out.println("!");
+        if (rule.length() > 0) rule = " -r " + rule;
+        for (Hash hash : hashes) {
+            hash.modesAttempted.clear();
             for (String mode : hash.modesToAttempt) {
                 if (hash.modesAttempted.contains(mode)) continue;
-                if (rule.length() > 0) rule = " -r " + rule;
                 String command = String.format("hashcat --force -m %s%s %s " + wordlist + "", mode, rule, hash.hash);
                 System.out.println(command);
                 try {
@@ -69,7 +68,7 @@ public class HashQueue {
                     if (sc.hasNext()) {
                         hash.password = sc.next();
                         hash.verifiedHashType = HashTypeIdentifier.getTypeFromMode(mode);
-                        return;
+                        break;
                     }
                 } catch (IOException | InterruptedException e) {
                     e.printStackTrace();

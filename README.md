@@ -8,40 +8,43 @@ The hashcat-GUI project is intended to provide a Graphical User Interface that u
 # Functionality
 
 - [ ] HashQueue.Hash input
-	- [ ] Read from file
-	- [ ] Copy and Paste 
+	- [x] Read from file
+	- [x] Copy and Paste 
 	- [ ] HashQueue.Hash extraction (i.e. user uploads encrypted zip and app extracts the hash)
-	- [ ] Inputs populate 'queue' table on GUI
-	- [ ] Auto-detects most likely hash type
+	- [x] Inputs populate 'queue' table on GUI
+	- [x] Auto-detects most likely hash type
 - [ ] Output
-	- [ ] Table in GUI alongside respective hashes
+	- [x] Table in GUI alongside respective hashes
 	- [ ] Rainbow Table
 	- [ ] CSV
 	- [ ] Report
 	- [ ] Greppable
-- [ ] Magic mode
-	- [ ] For a given `HashQueue.Hash` object, iterate through possible hash types and attempt to crack
+- [x] Magic mode
+	- [x] For a given `HashQueue.Hash` object, iterate through possible hash types and attempt to crack
 - [ ] Command Builder
 	- [ ] Use checkboxes to toggle command line arguments
-	- [ ] Use dropdowns or file chooser to select word lists
+	- [x] Use dropdowns or file chooser to select word lists
 	- [ ] Command to be used is created in real time and available for copy and paste
-- [ ] Masks and Rules
-	- [ ] User can easily make and save custom masks
-	- [ ] User can easily make and save custom rules
-	- [ ] Created masks and rules are available from Command Builder
-	- [ ] integrate maskprocessor
+- [x] Rules
+	- [x] User can easily make and save custom rules
+	- [x] Created rules are available from Command Builder
+	- [x] integrate maskprocessor
 - [ ] Dynamic custom wordlist attacks
 	- [ ] All modes operate on-demand so not to kill disk space
-	- [ ] CeWL used for targeted web-scraping
+	- [x] CeWL used for targeted web-scraping
 	- [ ] princeprocessor for compound wordlist
 	- [ ] kwprocessor for keyboard walk attacks (i.e. 1qaz!QAZ2wsx@WSX)
 
 # UML
-![743310666ea88129b60915bcf100ff55.png](_resources/4adf6b4a4c4c4eeda02e33dc9867b3e8.png)
+***Needs Update***
 	
 	
 # Class overviews
 <p>&nbsp;</p>
+***Extensive Refactoring has consolidated functionality down to three class files:***
+-MainGui
+-HashQueue
+-HashIdentifier
 
 ## MainGui
 - Constructed using Swing
