@@ -1,9 +1,12 @@
-import java.io.*;
+import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import javax.swing.*;
 
 class MainGUI extends JFrame implements ActionListener {
 
@@ -132,7 +135,7 @@ class MainGUI extends JFrame implements ActionListener {
                     String hash = inputHash.getText();
                     if (hash.length() > 0) {
                         hashQueue.addHash(hash);
-                    };
+                    }
 
                     break;
                 case "Load Hashes From File":
@@ -363,7 +366,7 @@ class MainGUI extends JFrame implements ActionListener {
                 postfix += "$?" + s.strip() + " ";
             }
         }
-        String[] command = {"maskprocessor", String.valueOf(capitalization + " " + prefix + postfix), "-o", rulePath};
+        String[] command = {"maskprocessor", capitalization + " " + prefix + postfix, "-o", rulePath};
         rulePathText.setText(rulePath);
         try {
             Process proc = Runtime.getRuntime().exec(command);
@@ -412,7 +415,7 @@ class MainGUI extends JFrame implements ActionListener {
 
                 while (true) {
                     try {
-                        Thread.sleep(1500);
+                        Thread.sleep(500);
                         window.updateTable();
                     } catch (InterruptedException e) {
                         e.printStackTrace();
@@ -425,4 +428,3 @@ class MainGUI extends JFrame implements ActionListener {
         window.setVisible(true);
     } // end main method
 } // end Main class
-
