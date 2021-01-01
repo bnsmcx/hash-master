@@ -1,7 +1,6 @@
 import java.io.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import javax.swing.*;
@@ -133,7 +132,6 @@ class MainGUI extends JFrame implements ActionListener {
                     String hash = inputHash.getText();
                     if (hash.length() > 0) {
                         hashQueue.addHash(hash);
-                        updateTable();
                     };
 
                     break;
@@ -143,11 +141,9 @@ class MainGUI extends JFrame implements ActionListener {
                     int returnValue = jfc.showOpenDialog(null);
                     if (returnValue == JFileChooser.APPROVE_OPTION) inputFile = jfc.getSelectedFile();
                     hashQueue.addHash(inputFile);
-                    updateTable();
                     break;
                 case "Magic":
                     attack();
-                    updateTable();
                     break;
                 case "Set Wordlist":
                     JFileChooser wordlistChooser = new JFileChooser();
@@ -156,6 +152,7 @@ class MainGUI extends JFrame implements ActionListener {
                     if (rv == JFileChooser.APPROVE_OPTION) wordlist = wordlistChooser.getSelectedFile();
                     wordlistPathText.setText(wordlist.getAbsolutePath());
                     hashQueue.wordlist = wordlist.getAbsolutePath();
+                    updateAttack();
                     break;
                 case "Set Rule":
                     File rule = new File(System.getProperty("user.dir"));
@@ -292,7 +289,6 @@ class MainGUI extends JFrame implements ActionListener {
                     break;
                 default:
                     updateAttack();
-                    updateTable();
             }
         } // end try
 
@@ -318,12 +314,16 @@ class MainGUI extends JFrame implements ActionListener {
             JOptionPane.showMessageDialog(null, "No hashes to crack.");
             return;
         }
-        try {
-            hashQueue.attack(wordlist.getAbsolutePath(), rulePath);
-        } catch (FileNotFoundException e) {
-            JOptionPane.showMessageDialog(null, "Please set a valid wordlist.");
-        }
-        updateTable();
+        ExecutorService service = Executors.newFixedThreadPool(4);
+        service.submit(new Runnable() {
+            public void run() {
+                try {
+                    hashQueue.attack(wordlist.getAbsolutePath(), rulePath);
+                } catch (FileNotFoundException e) {
+                    e.printStackTrace();
+                }
+            }
+        });
     }
 
     private void maskProcessor(String prefix, String postfix, String capitalization, String rulePath) {
@@ -376,6 +376,7 @@ class MainGUI extends JFrame implements ActionListener {
         }
         wordlist = new File(cewlOutputPath);
         wordlistPathText.setText(wordlist.getAbsolutePath());
+        updateAttack();
     }
 
     private void updateTable() {
@@ -392,7 +393,6 @@ class MainGUI extends JFrame implements ActionListener {
         }
         JTable updatedTable = new JTable(data, columnNames);
         hashTable.setModel(updatedTable.getModel());
-        System.out.println(Math.random());
     }
 
     public static void main(String[] args) {

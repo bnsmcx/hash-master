@@ -3,7 +3,7 @@ import java.util.*;
 
 public class HashQueue {
 
-    protected Stack<Hash> hashes = new Stack<>();
+    protected ArrayList<Hash> hashes = new ArrayList<>();
     protected String wordlist = "";
     private String rule = "";
 
@@ -53,21 +53,24 @@ public class HashQueue {
         Scanner testWordlist = new Scanner(new File(wordlist));
         if (!testWordlist.hasNext()) throw new FileNotFoundException();
         if (rule.length() > 0) rule = " -r " + rule;
-        for (Hash hash : hashes) {
-            hash.modesAttempted.clear();
-            for (String mode : hash.modesToAttempt) {
-                if (hash.modesAttempted.contains(mode)) continue;
-                String command = String.format("hashcat --force -m %s%s %s " + wordlist + "", mode, rule, hash.hash);
+
+        // reset modesAttempted in case this is an attack with new parameters
+        for (Hash h : hashes) h.modesAttempted.clear();
+
+        for (Hash currentHash: hashes) {
+            for (String mode : currentHash.modesToAttempt) {
+                if (currentHash.modesAttempted.contains(mode)) continue;
+                String command = String.format("hashcat --force -m %s%s %s " + wordlist + "", mode, rule, currentHash.hash);
                 System.out.println(command);
                 try {
-                    hash.modesAttempted.add(mode);
+                    currentHash.modesAttempted.add(mode);
                     Process proc = Runtime.getRuntime().exec(command);
                     proc.waitFor();
-                    proc = Runtime.getRuntime().exec(String.format("bash /home/daisy/hashcat-GUI/check_potfile.sh %s", hash.hash));
+                    proc = Runtime.getRuntime().exec(String.format("bash /home/daisy/hashcat-GUI/check_potfile.sh %s", currentHash.hash));
                     Scanner sc = new Scanner(proc.getInputStream());
                     if (sc.hasNext()) {
-                        hash.password = sc.next();
-                        hash.verifiedHashType = HashTypeIdentifier.getTypeFromMode(mode);
+                        currentHash.password = sc.next();
+                        currentHash.verifiedHashType = HashTypeIdentifier.getTypeFromMode(mode);
                         break;
                     }
                 } catch (IOException | InterruptedException e) {
@@ -93,7 +96,7 @@ public class HashQueue {
         }
 
         public String toString() {
-            return "Hash:    " + hash + "\n    Hash Type:\t" + verifiedHashType + "\n    Password:\t" + password + "\n";
+            return hash + ":" + verifiedHashType + ":" + password + "\n";
         }
     }
 }
