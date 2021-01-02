@@ -1,12 +1,10 @@
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import java.awt.event.*;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.*;
 
 class MainGUI extends JFrame implements ActionListener {
 
@@ -15,13 +13,14 @@ class MainGUI extends JFrame implements ActionListener {
 
     // File objects for input hashes and wordlists
     static File inputFile = new File(System.getProperty("user.dir"));
-    static File wordlist = new File("/home/daisy/parrot/rockyou.txt");
+    static File wordlist = new File("/usr/share/wordlists/rockyou.txt");
     static String cewlOutputPath = "";
     static String rulePath = "";
 
     // inputPanel components
     private final JButton addHashButton = new JButton("Add Hash");
     private final JButton inputFileButton = new JButton("Load Hashes From File");
+    private final JButton resetModesButton = new JButton("Reset Modes");
     private final JTextField inputHash = new JTextField();
     private final JButton magicButton = new JButton("Magic");
     private final JButton magicInfoButtion = new JButton("?");
@@ -60,7 +59,7 @@ class MainGUI extends JFrame implements ActionListener {
     public MainGUI() {
 
         // frame setup
-        super("Hashcat GUI");
+        super("hash-master 0.1.0");
         setSize(1000, 500);
         setResizable(false);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -84,6 +83,7 @@ class MainGUI extends JFrame implements ActionListener {
         inputPanel.add(addHashButton);
         inputPanel.add(inputHash);
         inputPanel.add(inputFileButton);
+        inputPanel.add(resetModesButton);
         inputPanel.add(magicButton);
         inputPanel.add(hailMaryButton);
         inputPanel.add(magicInfoButtion);
@@ -121,7 +121,7 @@ class MainGUI extends JFrame implements ActionListener {
         attackButton.addActionListener(this);
         clearRuleButton.addActionListener(this);
         hailMaryButton.addActionListener(this);
-
+        resetModesButton.addActionListener(this);
 
     } // end constructor
     // action listener
@@ -134,8 +134,12 @@ class MainGUI extends JFrame implements ActionListener {
         // take appropriate action based on which button was selected
         try {
             switch (buttonClicked) {
+                case "Reset Modes":
+                    for (HashQueue.Hash h : hashQueue.hashes) h.possibleHashTypes = HashTypeIdentifier.identify(h.hash);
+                    break;
                 case "Hail Mary":
-                    hashQueue.hailMary(wordlist.getAbsolutePath(), rulePath);
+                    hashQueue.hailMary();
+                    attack();
                     break;
                 case "Add Hash":
                     String hash = inputHash.getText();
@@ -220,10 +224,22 @@ class MainGUI extends JFrame implements ActionListener {
                     break;
                 case "?":
                     JOptionPane.showMessageDialog(null,
-                            "Clicking the 'Magic' button will perform a default dictionary attack\n " +
-                                    "against all the provided hashes.  It is great for catching low hanging\n "+
-                                    "fruit but beware that depending on the size of the list and the types\n "+
-                                    "of hashes this can take a long time.");
+                                    "During import each hash is passed through 'hashid' and a list of\n" +
+                                            "possible hash types is associated with the hash.\n" +
+                                            "\n" +
+                                            "Clicking the 'Magic' button will perform a default dictionary attack\n" +
+                                            "against all the provided hashes using the list of possible hashes.\n" +
+                                            "It is great for catching low hanging fruit.\n "+
+                                            "\n" +
+                                            "The 'Hail Mary' button will test the given hash or hashes using \n"+
+                                            "every possible hashcat mode.  This should only be run against short\n" +
+                                            "lists because it can obviously take a long time to run.  It has, however\n" +
+                                            "proven to be very useful for catching hashes that defy 'hashid' identification.\n" +
+                                            "\n" +
+                                            "Please note that using the 'Hail Mary' button will set the possible hash types\n" +
+                                            "for each hash to every possible hashcat mode.  This could be frustrating\n" +
+                                            "if you are proceeding with custom wordlist or mask attacks after attempting\n" +
+                                            "a Hail Mary.  Always hit the 'Reset Modes' button after a Hail Mary.");
                     break;
                 case "Attack":
                     System.out.println(rulePath);
@@ -314,7 +330,7 @@ class MainGUI extends JFrame implements ActionListener {
     private void updateAttack() {
         String rule = "";
         if (rulePath.length() > 0) rule = " -r " + rulePath;
-        String command = String.format("hashcat --force -m <mode>%s <hash> " + wordlist, rule);
+        String command = String.format("hashcat --potfile-path=potfile -m <mode>%s <hash> " + wordlist, rule);
         commandText.setText(command);
     }
 
@@ -372,7 +388,7 @@ class MainGUI extends JFrame implements ActionListener {
                 postfix += "$?" + s.strip() + " ";
             }
         }
-        String[] command = {"maskprocessor", capitalization + " " + prefix + postfix, "-o", rulePath};
+        String[] command = {"mp64", capitalization + " " + prefix + postfix, "-o", rulePath};
         rulePathText.setText(rulePath);
         try {
             Process proc = Runtime.getRuntime().exec(command);

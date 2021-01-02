@@ -17,10 +17,9 @@ public class HashQueue {
         addHash(inputFile);
     }
 
-    public void hailMary(String wordlist, String rule) throws IOException {
+    public void hailMary() throws IOException {
         System.out.println("HAIL MARY!!!");
         for (Hash hash : hashes) hash.modesToAttempt = HashTypeIdentifier.getAllModes();
-        attack(wordlist, rule);
     }
 
     // Creates and enqueues a single HashQueue.Hash object when passed a hash value as a String
@@ -60,7 +59,8 @@ public class HashQueue {
         for (Hash currentHash: hashes) {
             for (String mode : currentHash.modesToAttempt) {
                 if (currentHash.modesAttempted.contains(mode)) continue;
-                String command = String.format("hashcat --force -m %s%s %s " + wordlist + "", mode, rule, currentHash.hash);
+                String command = String.format("hashcat --potfile-path=potfile -m %s%s %s " +
+                        wordlist + "", mode, rule, currentHash.hash);
                 System.out.println(command);
                 try {
                     currentHash.modesAttempted.add(mode);
