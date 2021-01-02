@@ -25,6 +25,7 @@ class MainGUI extends JFrame implements ActionListener {
     private final JTextField inputHash = new JTextField();
     private final JButton magicButton = new JButton("Magic");
     private final JButton magicInfoButtion = new JButton("?");
+    private final JButton hailMaryButton = new JButton("Hail Mary");
     JPanel inputPanel = new JPanel();
 
     // outputPanel components
@@ -84,6 +85,7 @@ class MainGUI extends JFrame implements ActionListener {
         inputPanel.add(inputHash);
         inputPanel.add(inputFileButton);
         inputPanel.add(magicButton);
+        inputPanel.add(hailMaryButton);
         inputPanel.add(magicInfoButtion);
         outputPanel.add(scrollPane);
         wordlistPanel.add(selectWordlistButton);
@@ -118,6 +120,7 @@ class MainGUI extends JFrame implements ActionListener {
         setRuleButton.addActionListener(this);
         attackButton.addActionListener(this);
         clearRuleButton.addActionListener(this);
+        hailMaryButton.addActionListener(this);
 
 
     } // end constructor
@@ -131,12 +134,15 @@ class MainGUI extends JFrame implements ActionListener {
         // take appropriate action based on which button was selected
         try {
             switch (buttonClicked) {
+                case "Hail Mary":
+                    hashQueue.hailMary(wordlist.getAbsolutePath(), rulePath);
+                    break;
                 case "Add Hash":
                     String hash = inputHash.getText();
                     if (hash.length() > 0) {
                         hashQueue.addHash(hash);
                     }
-
+                    inputHash.setText("");
                     break;
                 case "Load Hashes From File":
                     JFileChooser jfc = new JFileChooser();

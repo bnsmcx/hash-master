@@ -17,11 +17,11 @@ public class HashQueue {
         addHash(inputFile);
     }
 
-//    public void hailMary(Hash hash) throws IOException {
-//        System.out.println("HAIL MARY!!!");
-//        hash.modesToAttempt = HashTypeIdentifier.getAllModes();
-//        attack(hash);
-//    }
+    public void hailMary(String wordlist, String rule) throws IOException {
+        System.out.println("HAIL MARY!!!");
+        for (Hash hash : hashes) hash.modesToAttempt = HashTypeIdentifier.getAllModes();
+        attack(wordlist, rule);
+    }
 
     // Creates and enqueues a single HashQueue.Hash object when passed a hash value as a String
     protected Runnable addHash(String hash) throws IOException {
@@ -66,7 +66,7 @@ public class HashQueue {
                     currentHash.modesAttempted.add(mode);
                     Process proc = Runtime.getRuntime().exec(command);
                     proc.waitFor();
-                    proc = Runtime.getRuntime().exec(String.format("bash /home/daisy/hashcat-GUI/check_potfile.sh %s", currentHash.hash));
+                    proc = Runtime.getRuntime().exec(String.format("bash check_potfile.sh %s", currentHash.hash));
                     Scanner sc = new Scanner(proc.getInputStream());
                     if (sc.hasNext()) {
                         currentHash.password = sc.next();

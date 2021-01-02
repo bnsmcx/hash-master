@@ -54,7 +54,7 @@ public class HashTypeIdentifier {
             permutations.add(type.toUpperCase());
             for (String permutation : permutations){
                 Process proc = Runtime.getRuntime().exec(
-                        String.format("bash /home/daisy/hashcat-GUI/get_modes.sh %s", permutation));
+                        String.format("bash get_modes.sh %s", permutation));
                 Scanner sc = new Scanner(proc.getInputStream());
                 while (sc.hasNext()) {
                     String temp = sc.nextLine();
@@ -67,14 +67,14 @@ public class HashTypeIdentifier {
     }
 
     public static String getTypeFromMode(String mode) throws IOException {
-        Process proc = Runtime.getRuntime().exec(String.format("bash /home/daisy/hashcat-GUI/get_type_from_mode.sh %s", mode));
+        Process proc = Runtime.getRuntime().exec(String.format("bash get_type_from_mode.sh %s", mode));
         Scanner sc = new Scanner(proc.getInputStream());
         return sc.nextLine();
     }
 
     public static ArrayList<String> getAllModes() throws IOException {
         ArrayList<String> allModes = new ArrayList<>();
-        Process proc = Runtime.getRuntime().exec("bash /home/daisy/hashcat-GUI/get_all_modes.sh");
+        Process proc = Runtime.getRuntime().exec("bash get_all_modes.sh");
         Scanner sc = new Scanner(proc.getInputStream());
         while (sc.hasNext()){
             allModes.add(sc.nextLine());
