@@ -45,13 +45,14 @@ public class HashQueue {
     }
 
     public void attack(String wordlist, String rule) throws FileNotFoundException {
+        System.out.println("test");
         this.wordlist = wordlist;
         this.rule = rule;
 
         // confirm wordlist exists, forces exception
         Scanner testWordlist = new Scanner(new File(wordlist));
         if (!testWordlist.hasNext()) throw new FileNotFoundException();
-        if (rule.length() > 0) rule = " -r " + rule;
+        if (rule != null) rule = " -r " + rule;
 
         // reset modesAttempted in case this is an attack with new parameters
         for (Hash h : hashes) h.modesAttempted.clear();
@@ -59,8 +60,7 @@ public class HashQueue {
         for (Hash currentHash: hashes) {
             for (String mode : currentHash.modesToAttempt) {
                 if (currentHash.modesAttempted.contains(mode)) continue;
-                String command = String.format("hashcat --potfile-path=potfile -m %s%s %s " +
-                        wordlist + "", mode, rule, currentHash.hash);
+                String command = String.format("hashcat --force --potfile-path=potfile -m %s %s %s ", mode, rule, currentHash.hash, wordlist);
                 System.out.println(command);
                 try {
                     currentHash.modesAttempted.add(mode);
